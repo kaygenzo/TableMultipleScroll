@@ -2,13 +2,18 @@ package com.telen.library.widget.tablemultiscroll.views
 
 import android.content.Context
 import android.graphics.Typeface
+import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.telen.library.widget.tablemultiscroll.R
 import com.telen.library.widget.tablemultiscroll.adapter.DataRow
 import com.telen.library.widget.tablemultiscroll.adapter.HeaderRow
@@ -21,7 +26,9 @@ class MultipleScrollTableView: ConstraintLayout {
             @DimenRes val cellTextSize: Int,
             val cellTextTypeface: Typeface,
             @ColorRes val cellDefaultBackgroundColor: Int,
-            @ColorRes val cellDefaultTextColor: Int)
+            @ColorRes val cellDefaultTextColor: Int,
+            val linesCount: Int = 1,
+            val truncateStrategy: TextUtils.TruncateAt = TextUtils.TruncateAt.END)
 
     data class TableConfiguration(
             @DimenRes val topHeaderHeight: Int,
@@ -95,6 +102,8 @@ class MultipleScrollTableView: ConstraintLayout {
             adapter = mLeftHeaderAdapter
             layoutManager = LinearLayoutManager(context)
         }
+
+        initShadows()
 
         topHeaderScroll.mirror = mainTableHorizontalScroll
         leftHeader.mirror = mainTableRecyclerRows
@@ -193,8 +202,10 @@ class MultipleScrollTableView: ConstraintLayout {
             topHeader.removeAllViews()
             topHeaderData?.tableInfo?.forEach {
                 addData(it.value, "", null, tableConfiguration.cellWidth, tableConfiguration.topHeaderHeight,
-                        topHeaderStyle.cellDefaultBackgroundColor, topHeaderStyle.cellDefaultTextColor,
-                        topHeaderStyle.cellTextSize, topHeaderStyle.cellTextTypeface)
+                    topHeaderStyle.cellDefaultBackgroundColor, topHeaderStyle.cellDefaultTextColor,
+                    topHeaderStyle.cellTextSize, topHeaderStyle.cellTextTypeface, topHeaderStyle.linesCount,
+                    topHeaderStyle.truncateStrategy
+                )
             }
             invalidate()
         }
@@ -216,5 +227,87 @@ class MultipleScrollTableView: ConstraintLayout {
             layoutParams = LayoutParams(width, height)
             invalidate()
         }
+    }
+
+    private fun initShadows() {
+        initRecyclerShadow(mainTableRecyclerRows, shadowTopMain)
+        initRecyclerShadow(mainTableRecyclerRows, shadowTopLeftHeader)
+        initScrollviewShadow(mainTableHorizontalScroll, arrayOf(shadowLeftMain, shadowLeftTopHeader))
+    }
+
+    private fun initScrollviewShadow(scrollView: CustomHorizontalScrollView, shadowViews: Array<View>) {
+        scrollView.customScrollListener = object: CustomHorizontalScrollView.OnPositionCallback {
+
+            override fun onBeginScrolling() {
+                Log.d("DEBUG","onBeginScrolling")
+                shadowViews.forEach {
+                    val fadeIn = AlphaAnimation(0f, 1f)
+                    fadeIn.setAnimationListener(object: Animation.AnimationListener {
+                        override fun onAnimationRepeat(animation: Animation?) {}
+                        override fun onAnimationStart(animation: Animation?) {}
+                        override fun onAnimationEnd(animation: Animation?) {
+                            it.alpha = 1f
+                        }
+                    })
+                    fadeIn.duration = 100
+                    it.startAnimation(fadeIn)
+                }
+            }
+
+            override fun onBackToStart() {
+                Log.d("DEBUG","onBackToStart")
+                shadowViews.forEach {
+                    val fadeOut = AlphaAnimation(1f, 0f)
+                    fadeOut.setAnimationListener(object: Animation.AnimationListener {
+                        override fun onAnimationRepeat(animation: Animation?) {}
+                        override fun onAnimationStart(animation: Animation?) {}
+                        override fun onAnimationEnd(animation: Animation?) {
+                            it.alpha = 0f
+                        }
+                    })
+                    fadeOut.duration = 100
+                    it.startAnimation(fadeOut)
+                }
+            }
+        }
+    }
+
+    private fun initRecyclerShadow(recycler: RecyclerView, shadowView: View) {
+        val linearLayoutManager = recycler.layoutManager as LinearLayoutManager
+        recycler.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+
+            private var isFirst = false
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val firstCompleteItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition()
+                if(firstCompleteItemPosition == 0) {
+                    val fadeOut = AlphaAnimation(1f, 0f)
+                    fadeOut.setAnimationListener(object: Animation.AnimationListener {
+                        override fun onAnimationRepeat(animation: Animation?) {}
+                        override fun onAnimationStart(animation: Animation?) {}
+                        override fun onAnimationEnd(animation: Animation?) {
+                            shadowView.alpha = 0f
+                            isFirst = true
+                        }
+                    })
+                    fadeOut.duration = 100
+                    shadowView.startAnimation(fadeOut)
+                }
+                else if(isFirst) {
+                    isFirst = false
+                    val fadeIn = AlphaAnimation(0f, 1f)
+                    fadeIn.setAnimationListener(object: Animation.AnimationListener {
+                        override fun onAnimationRepeat(animation: Animation?) {}
+                        override fun onAnimationStart(animation: Animation?) {}
+                        override fun onAnimationEnd(animation: Animation?) {
+                            shadowView.alpha = 1f
+                        }
+                    })
+                    fadeIn.duration = 100
+                    shadowView.startAnimation(fadeIn)
+                }
+            }
+        })
     }
 }

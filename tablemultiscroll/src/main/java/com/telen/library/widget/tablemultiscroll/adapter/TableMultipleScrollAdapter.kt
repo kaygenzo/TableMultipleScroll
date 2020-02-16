@@ -31,6 +31,8 @@ class TableMultipleScrollAdapter(private val rows: List<DataRow>?,
         val textColor = style.cellDefaultTextColor
         val textSize = style.cellTextSize
         val textTypeface = style.cellTextTypeface
+        val linesCount = style.linesCount
+        val truncateStrategy = style.truncateStrategy
 
         holder.view.removeAllViews()
 
@@ -39,10 +41,10 @@ class TableMultipleScrollAdapter(private val rows: List<DataRow>?,
             headers?.tableInfo?.forEach { entry ->
                 val data = rowData.tableInfo[entry.key] ?: ""
                 holder.view.addData(data, "", null, cellWidth, cellHeight,
-                        backgroundColor, textColor, textSize, textTypeface)
+                        backgroundColor, textColor, textSize, textTypeface, linesCount, truncateStrategy)
             } ?: rowData.tableInfo.forEach { entry ->
                 holder.view.addData(entry.value, "", null, cellWidth, cellHeight,
-                        backgroundColor, textColor, textSize, textTypeface)
+                        backgroundColor, textColor, textSize, textTypeface, linesCount, truncateStrategy)
             }
         }
     }

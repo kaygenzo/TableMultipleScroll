@@ -2,6 +2,7 @@ package com.telen.library.widget.tablemultiscroll.views
 
 import android.content.Context
 import android.graphics.Typeface
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -29,7 +30,8 @@ class TableRowView: LinearLayoutCompat {
     fun addData(data: String, viewTag: String, viewId: Int? = null,
                 @DimenRes width: Int, @DimenRes height: Int,
                 @ColorRes backgroundColor: Int, @ColorRes textColor: Int,
-                @DimenRes textSize: Int, textTypeface: Typeface): View {
+                @DimenRes textSize: Int, textTypeface: Typeface,
+                linesCount: Int, truncateStrategy: TextUtils.TruncateAt): View {
         val textView = TextView(context)
         val params = LayoutParams(resources.getDimensionPixelSize(width), ViewGroup.LayoutParams.MATCH_PARENT)
         params.setMargins(1,1,1,1)
@@ -45,6 +47,9 @@ class TableRowView: LinearLayoutCompat {
             }
             gravity = Gravity.CENTER
             text = data
+            setLines(linesCount)
+            setSingleLine(linesCount == 1)
+            ellipsize = truncateStrategy
             this
         }
 
