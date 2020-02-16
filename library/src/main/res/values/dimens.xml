@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="default_table_multiple_scroll_text_size">20sp</dimen>
+    <dimen name="default_table_multiple_scroll_cell_width">70dp</dimen>
+    <dimen name="default_table_multiple_scroll_cell_height">30dp</dimen>
+    <dimen name="default_table_multiple_scroll_left_header_width">90dp</dimen>
+    <dimen name="default_table_multiple_scroll_top_header_height">50dp</dimen>
+</resources>

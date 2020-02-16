@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="default_table_multiple_scroll_header_background_color">#ff37474f</color>
+    <color name="default_table_multiple_scroll_header_text_color">#FFFFFF</color>
+    <color name="default_table_multiple_scroll_cell_background_color">#FFFFFF</color>
+    <color name="default_table_multiple_scroll_cell_text_color">#000000</color>
+</resources>
