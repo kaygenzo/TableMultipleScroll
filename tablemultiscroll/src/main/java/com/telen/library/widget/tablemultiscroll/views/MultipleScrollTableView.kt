@@ -135,6 +135,7 @@ class MultipleScrollTableView: ConstraintLayout {
     }
 
     fun setMainData(rows: List<List<CellConfiguration>>) {
+        tableData.clear()
         rows.forEach { columns ->
             val mapData = mutableMapOf<Int, String>()
             tableData.add(DataRow(mapData))
