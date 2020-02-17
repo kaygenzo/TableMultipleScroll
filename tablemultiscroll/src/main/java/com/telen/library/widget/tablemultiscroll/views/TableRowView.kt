@@ -27,7 +27,13 @@ class TableRowView: LinearLayoutCompat {
         LayoutInflater.from(context).inflate(R.layout.view_table_multiple_scroll_row_item, this)
     }
 
-    fun addData(data: String, viewTag: String, viewId: Int? = null,
+    fun addData(data: String,  @DimenRes width: Int, @DimenRes height: Int, style: StyleConfiguration) {
+        addData(data, width, height, style.cellDefaultBackgroundColor, style.cellDefaultTextColor,
+            style.cellTextSize, style.cellTextTypeface, style.linesCount,
+            style.truncateStrategy)
+    }
+
+    fun addData(data: String,
                 @DimenRes width: Int, @DimenRes height: Int,
                 @ColorRes backgroundColor: Int, @ColorRes textColor: Int,
                 @DimenRes textSize: Int, textTypeface: Typeface,
@@ -41,10 +47,6 @@ class TableRowView: LinearLayoutCompat {
             setTextColor(ContextCompat.getColor(context, textColor))
             this.typeface = textTypeface
             this.setTextSize(TypedValue.COMPLEX_UNIT_PX , resources.getDimension(textSize))
-            tag = viewTag
-            viewId?.let {
-                id = it
-            }
             gravity = Gravity.CENTER
             text = data
             setLines(linesCount)

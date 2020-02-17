@@ -17,26 +17,34 @@ import androidx.recyclerview.widget.RecyclerView
 import com.telen.library.widget.tablemultiscroll.R
 import com.telen.library.widget.tablemultiscroll.adapter.DataRow
 import com.telen.library.widget.tablemultiscroll.adapter.HeaderRow
+import com.telen.library.widget.tablemultiscroll.adapter.OnTableClickListener
 import com.telen.library.widget.tablemultiscroll.adapter.TableMultipleScrollAdapter
 import kotlinx.android.synthetic.main.view_table_multi_scroll.view.*
 
+data class StyleConfiguration(
+    @DimenRes val cellTextSize: Int = R.dimen.default_table_multiple_scroll_text_size,
+    val cellTextTypeface: Typeface = Typeface.DEFAULT,
+    @ColorRes val cellDefaultBackgroundColor: Int = R.color.default_table_multiple_scroll_cell_background_color,
+    @ColorRes val cellDefaultTextColor: Int = R.color.default_table_multiple_scroll_cell_text_color,
+    val linesCount: Int = 1,
+    val truncateStrategy: TextUtils.TruncateAt = TextUtils.TruncateAt.END)
+
+data class TableConfiguration(
+    @DimenRes val topHeaderHeight: Int = R.dimen.default_table_multiple_scroll_top_header_height,
+    @DimenRes val leftHeaderWidth: Int = R.dimen.default_table_multiple_scroll_left_header_width,
+    @DimenRes val cellHeight: Int = R.dimen.default_table_multiple_scroll_cell_height,
+    @DimenRes val cellWidth: Int = R.dimen.default_table_multiple_scroll_cell_width)
+
+data class CellConfiguration(val text: String, val id: Int = 0)
+
+data class Highlight(val index: Int, val style: StyleConfiguration)
+
+enum class HighlightConflictStrategy {
+    PriorityRow,
+    PriorityColumn
+}
+
 class MultipleScrollTableView: ConstraintLayout {
-
-    data class StyleConfiguration(
-            @DimenRes val cellTextSize: Int,
-            val cellTextTypeface: Typeface,
-            @ColorRes val cellDefaultBackgroundColor: Int,
-            @ColorRes val cellDefaultTextColor: Int,
-            val linesCount: Int = 1,
-            val truncateStrategy: TextUtils.TruncateAt = TextUtils.TruncateAt.END)
-
-    data class TableConfiguration(
-            @DimenRes val topHeaderHeight: Int,
-            @DimenRes val leftHeaderWidth: Int,
-            @DimenRes val cellHeight: Int,
-            @DimenRes val cellWidth: Int)
-
-    data class CellConfiguration(val text: String, val id: Int = 0)
 
     private var mMainAdapter: TableMultipleScrollAdapter
     private var mLeftHeaderAdapter: TableMultipleScrollAdapter
@@ -50,6 +58,9 @@ class MultipleScrollTableView: ConstraintLayout {
     private var topHeaderStyle: StyleConfiguration
     private var tableConfiguration: TableConfiguration
 
+    private val rowsHighlights = mutableMapOf<Int, Highlight>()
+    private val columnHighlights = mutableMapOf<Int, Highlight>()
+
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -57,17 +68,10 @@ class MultipleScrollTableView: ConstraintLayout {
     init {
         LayoutInflater.from(context).inflate(R.layout.view_table_multi_scroll, this)
 
-        mainTableStyle =
-            StyleConfiguration(
-                cellTextSize = R.dimen.default_table_multiple_scroll_text_size,
-                cellTextTypeface = Typeface.DEFAULT,
-                cellDefaultBackgroundColor = R.color.default_table_multiple_scroll_cell_background_color,
-                cellDefaultTextColor = R.color.default_table_multiple_scroll_cell_text_color
-            )
+        mainTableStyle = StyleConfiguration()
 
         topHeaderStyle =
             StyleConfiguration(
-                cellTextSize = R.dimen.default_table_multiple_scroll_text_size,
                 cellTextTypeface = Typeface.DEFAULT_BOLD,
                 cellDefaultBackgroundColor = R.color.default_table_multiple_scroll_header_background_color,
                 cellDefaultTextColor = R.color.default_table_multiple_scroll_header_text_color
@@ -75,23 +79,18 @@ class MultipleScrollTableView: ConstraintLayout {
 
         leftHeaderStyle =
             StyleConfiguration(
-                cellTextSize = R.dimen.default_table_multiple_scroll_text_size,
                 cellTextTypeface = Typeface.DEFAULT_BOLD,
                 cellDefaultBackgroundColor = R.color.default_table_multiple_scroll_header_background_color,
                 cellDefaultTextColor = R.color.default_table_multiple_scroll_header_text_color
             )
 
-        tableConfiguration =
-            TableConfiguration(
-                cellHeight = R.dimen.default_table_multiple_scroll_cell_height,
-                cellWidth = R.dimen.default_table_multiple_scroll_cell_width,
-                leftHeaderWidth = R.dimen.default_table_multiple_scroll_left_header_width,
-                topHeaderHeight = R.dimen.default_table_multiple_scroll_top_header_height
-            )
+        tableConfiguration = TableConfiguration()
 
-        mMainAdapter = TableMultipleScrollAdapter(tableData, null, tableConfiguration.cellWidth, tableConfiguration.cellHeight, mainTableStyle)
+        mMainAdapter = TableMultipleScrollAdapter(tableData, null, tableConfiguration.cellWidth, tableConfiguration.cellHeight,
+            mainTableStyle, rowsHighlights, columnHighlights)
 
-        mLeftHeaderAdapter = TableMultipleScrollAdapter(leftHeaderData, null, tableConfiguration.leftHeaderWidth, tableConfiguration.cellHeight, leftHeaderStyle)
+        mLeftHeaderAdapter = TableMultipleScrollAdapter(leftHeaderData, null, tableConfiguration.leftHeaderWidth, tableConfiguration.cellHeight,
+            leftHeaderStyle)
 
         mainTableRecyclerRows.run {
             adapter = mMainAdapter
@@ -132,6 +131,33 @@ class MultipleScrollTableView: ConstraintLayout {
         mLeftHeaderAdapter.cellWidth = config.leftHeaderWidth
 
         refreshEmptyCell()
+    }
+
+    fun setRowHighlights(highlights: List<Highlight>) {
+        this.rowsHighlights.clear()
+        highlights.forEach {
+            this.rowsHighlights[it.index] = it
+        }
+
+        mMainAdapter.notifyDataSetChanged()
+    }
+
+    fun setColumnHighlights(highlights: List<Highlight>) {
+        this.columnHighlights.clear()
+        highlights.forEach {
+            this.columnHighlights[it.index] = it
+        }
+
+        mMainAdapter.notifyDataSetChanged()
+    }
+
+    fun setHighlightsConflictStrategy(strategy: HighlightConflictStrategy) {
+        mMainAdapter.highlightsConflictStrategy = strategy
+        mMainAdapter.notifyDataSetChanged()
+    }
+
+    fun setOnTableClickListener(listener: OnTableClickListener) {
+        mMainAdapter.tableClickListener = listener
     }
 
     fun setMainData(rows: List<List<CellConfiguration>>) {
@@ -202,11 +228,7 @@ class MultipleScrollTableView: ConstraintLayout {
         topHeader.run {
             topHeader.removeAllViews()
             topHeaderData?.tableInfo?.forEach {
-                addData(it.value, "", null, tableConfiguration.cellWidth, tableConfiguration.topHeaderHeight,
-                    topHeaderStyle.cellDefaultBackgroundColor, topHeaderStyle.cellDefaultTextColor,
-                    topHeaderStyle.cellTextSize, topHeaderStyle.cellTextTypeface, topHeaderStyle.linesCount,
-                    topHeaderStyle.truncateStrategy
-                )
+                addData(it.value, tableConfiguration.cellWidth, tableConfiguration.topHeaderHeight, topHeaderStyle)
             }
             invalidate()
         }
