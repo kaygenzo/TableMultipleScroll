@@ -53,12 +53,12 @@ class MainActivity : AppCompatActivity() {
 
         val columnHighlights = mutableListOf<Highlight>()
         columnHighlights.add(Highlight(0, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorAccent, cellDefaultTextColor = R.color.colorPrimary)))
-        columnHighlights.add(Highlight(2, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorAccent, cellDefaultTextColor = R.color.colorPrimary)))
+        columnHighlights.add(Highlight(2, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorPrimaryDark, cellDefaultTextColor = android.R.color.white)))
         multipleScrollTableView.setRowHighlights(columnHighlights)
 
         val rowsHighlights = mutableListOf<Highlight>()
         rowsHighlights.add(Highlight(0, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorPrimary, cellDefaultTextColor = R.color.colorAccent)))
-        rowsHighlights.add(Highlight(2, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorPrimary, cellDefaultTextColor = R.color.colorAccent)))
+        rowsHighlights.add(Highlight(2, StyleConfiguration(cellDefaultBackgroundColor = android.R.color.black, cellDefaultTextColor = R.color.colorAccent)))
         multipleScrollTableView.setColumnHighlights(rowsHighlights)
 
         multipleScrollTableView.setHighlightsConflictStrategy(HighlightConflictStrategy.PriorityColumn)
