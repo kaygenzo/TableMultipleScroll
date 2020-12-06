@@ -4,6 +4,8 @@ import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import com.telen.library.widget.tablemultiscroll.adapter.OnTableClickListener
 import com.telen.library.widget.tablemultiscroll.views.CellConfiguration
@@ -72,5 +74,10 @@ class MainActivity : AppCompatActivity() {
         multipleScrollTableView.setLeftHeaderData(leftHeaderData)
         multipleScrollTableView.setTopHeaderData(topHeaderData)
         multipleScrollTableView.setMainData(mainData)
+
+        val spinner = Spinner(this).apply {
+            adapter = ArrayAdapter(this@MainActivity, R.layout.adapter_item, arrayOf("Test1","Test2"))
+        }
+        multipleScrollTableView.setTopLeftCellCustomView(spinner)
     }
 }

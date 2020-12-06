@@ -224,6 +224,13 @@ class MultipleScrollTableView: ConstraintLayout {
         }
     }
 
+    fun setTopLeftCellCustomView(view: View) {
+        emptyHeaderCell.run {
+            addView(view)
+            invalidate()
+        }
+    }
+
     private fun refreshTopHeaderView() {
         topHeader.run {
             topHeader.removeAllViews()
