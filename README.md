@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/kaygenzo/telen/tablemultiscroll/images/download.svg) ](https://bintray.com/kaygenzo/telen/tablemultiscroll/_latestVersion)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/980fe2998fb343ea8011c212d899bd59)](https://app.codacy.com/gh/kaygenzo/TableMultipleScroll/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 # Android Multi Scroll Table
 
@@ -6,14 +6,14 @@
 
  ## Installation
 
- ```bash
- implementation "com.telen.library:tablemultiscroll:$tablemultiscrollVersion"
+ ```groovy
+ implementation "io.github.kaygenzo:androidtable:$androidtableVersion"
  ```
 
  ## Usage
 
  ```xml
- <com.telen.library.widget.tablemultiscroll.views.MultipleScrollTableView
+ <io.github.kaygenzo.androidtable.api.AndroidTableView
         android:id="@+id/multipleScrollTableView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -23,7 +23,7 @@
 
 ![Table simple](images/image1.gif)
 
-```java
+```kotlin
 val mainData = mutableListOf<List<CellConfiguration>>()
 val rowCount = 40
 val columnCount = 30
@@ -41,7 +41,7 @@ multipleScrollTableView.setMainData(mainData)
 
 ![Table with top header](images/image2.png)
 
-```java
+```kotlin
 val mainData = mutableListOf<List<CellConfiguration>>()
 val topHeaderData = mutableListOf<CellConfiguration>()
 val rowCount = 40
@@ -64,7 +64,7 @@ multipleScrollTableView.setMainData(mainData)
 
 ![Table with top header](images/image3.png)
 
-```java
+```kotlin
 val mainData = mutableListOf<List<CellConfiguration>>()
 val leftHeaderData = mutableListOf<CellConfiguration>()
 val rowCount = 40
@@ -87,7 +87,7 @@ multipleScrollTableView.setMainData(mainData)
 
 ![Table with top header](images/image4.gif)
 
-```java
+```kotlin
 val mainData = mutableListOf<List<CellConfiguration>>()
 val topHeaderData = mutableListOf<CellConfiguration>()
 val leftHeaderData = mutableListOf<CellConfiguration>()
@@ -117,7 +117,7 @@ multipleScrollTableView.setMainData(mainData)
 
 You can Highlight columns or rows by adding specific styles at specific indexes
 
-```java
+```kotlin
 val columnHighlights = mutableListOf<Highlight>()
 columnHighlights.add(Highlight(0, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorAccent, cellDefaultTextColor = R.color.colorPrimary)))
 columnHighlights.add(Highlight(2, StyleConfiguration(cellDefaultBackgroundColor = R.color.colorPrimaryDark, cellDefaultTextColor = android.R.color.white)))
@@ -131,13 +131,13 @@ multipleScrollTableView.setColumnHighlights(rowsHighlights)
 
 In the specific case when a row cross a column, you can specify the strategy to apply. By default, the priority is column
 
-```java
+```kotlin
 multipleScrollTableView.setHighlightsConflictStrategy(HighlightConflictStrategy.PriorityColumn)
 ```
 
 ### 6. Click on cell listener
 
-```java
+```kotlin
 multipleScrollTableView.setOnTableClickListener(object : OnTableClickListener {
     override fun onCellClicked(text: String, row: Int, column: Int) {
         Toast.makeText(this@MainActivity, "text:$text row:$row column:$column", Toast.LENGTH_SHORT).show()
@@ -147,7 +147,7 @@ multipleScrollTableView.setOnTableClickListener(object : OnTableClickListener {
 
 ### 7. Customize cells style
 
-```java
+```kotlin
 multipleScrollTableView.setTopHeaderStyle(
    StyleConfiguration(
        cellTextSize = R.dimen.default_table_multiple_scroll_text_size,
@@ -157,6 +157,15 @@ multipleScrollTableView.setTopHeaderStyle(
        linesCount = 1,
        truncateStrategy = TextUtils.TruncateAt.END
 ))
+```
+
+### 8. Add a custom view in the top left view
+```kotlin
+val spinner = Spinner(this).apply {
+    adapter =
+        ArrayAdapter(this@MainActivity, R.layout.adapter_item, arrayOf("Test1", "Test2"))
+}
+binding.multipleScrollTableView.setTopLeftCellCustomView(spinner)
 ```
 
 ### 8. Limitations
