@@ -13,7 +13,6 @@ internal data class HeaderRow(val tableInfo: Map<Int, String>)
 
 internal class AndroidTableAdapter(
     private val rows: List<DataRow>,
-    var header: HeaderRow?,
     var cellWidth: Int,
     var cellHeight: Int,
     var style: StyleConfiguration,

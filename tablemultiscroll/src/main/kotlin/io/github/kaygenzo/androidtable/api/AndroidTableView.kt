@@ -1,5 +1,6 @@
 package io.github.kaygenzo.androidtable.api
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -39,7 +40,6 @@ class AndroidTableView : ConstraintLayout {
 
     private var mMainAdapter = AndroidTableAdapter(
         tableData,
-        null,
         tableConfiguration.cellWidth,
         tableConfiguration.cellHeight,
         mainTableStyle,
@@ -48,7 +48,6 @@ class AndroidTableView : ConstraintLayout {
     )
     private var mLeftHeaderAdapter = AndroidTableAdapter(
         leftHeaderData,
-        null,
         tableConfiguration.leftHeaderWidth,
         tableConfiguration.cellHeight,
         leftHeaderStyle
@@ -113,11 +112,11 @@ class AndroidTableView : ConstraintLayout {
         this.rowsHighlights.clear()
         highlights.forEach {
             this.rowsHighlights[it.index] = it
+            mMainAdapter.notifyItemChanged(it.index)
         }
-
-        mMainAdapter.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setColumnHighlights(highlights: List<Highlight>) {
         this.columnHighlights.clear()
         highlights.forEach {
@@ -127,6 +126,7 @@ class AndroidTableView : ConstraintLayout {
         mMainAdapter.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setHighlightsConflictStrategy(strategy: HighlightConflictStrategy) {
         mMainAdapter.highlightsConflictStrategy = strategy
         mMainAdapter.notifyDataSetChanged()
@@ -138,8 +138,10 @@ class AndroidTableView : ConstraintLayout {
 
     fun setMainData(rows: List<List<CellConfiguration>>) {
         tableData.clear()
-        rows.forEach { columns -> tableData.add(DataRow(columns.toTableInfo())) }
-        mMainAdapter.notifyDataSetChanged()
+        rows.forEachIndexed { i, columns ->
+            tableData.add(DataRow(columns.toTableInfo()))
+            mMainAdapter.notifyItemChanged(i)
+        }
     }
 
     fun setTopHeaderData(data: List<CellConfiguration>?) {
@@ -151,8 +153,6 @@ class AndroidTableView : ConstraintLayout {
 
         refreshEmptyCell()
         refreshTopHeaderView()
-        mMainAdapter.header = topHeaderData
-        mMainAdapter.notifyDataSetChanged()
 
         with(binding) {
             if (topHeaderData != null) {
@@ -168,16 +168,15 @@ class AndroidTableView : ConstraintLayout {
     fun setLeftHeaderData(data: List<CellConfiguration>) {
         leftHeaderData.clear()
         if (data.isNotEmpty()) {
-            data.forEach {
+            data.forEachIndexed { i, value ->
                 val map = mutableMapOf<Int, String>()
-                map[0] = it.text
+                map[0] = value.text
                 leftHeaderData.add(DataRow(map))
+                mLeftHeaderAdapter.notifyItemChanged(i)
             }
         }
 
         refreshEmptyCell()
-
-        mLeftHeaderAdapter.notifyDataSetChanged()
 
         with(binding) {
             if (leftHeaderData.isNotEmpty()) {
